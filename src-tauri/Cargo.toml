@@ -1,21 +1,21 @@
 [package]
 name = "qrcode-helper"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+version = "0.1.0"
+description = "Generation and decoding of QR codes"
+authors = ["Hunlongyu <hunlongyu@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/Hunlongyu/qrcode-helper"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.2", features = [] }
+tauri-build = { version = "^1.0", features = [] }
 
 [dependencies]
-tauri = { version = "1.2", features = ["shell-open"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+tauri = { version = "^1.0", features = ["shell-open"] }
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "^1.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
