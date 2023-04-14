@@ -1,7 +1,9 @@
 <template>
   <div class="main">
     <Navigation @changeView="changeViews"/>
-    <component :is="active"></component>
+    <keep-alive>
+      <component :is="active"></component>
+    </keep-alive>
   </div>
 </template>
 
