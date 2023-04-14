@@ -91,10 +91,7 @@ function changeExpend (e: string) {
       outline: none;
       word-break:break-all;
       min-width: 400px;
-      // min-height: 100px;
       display: flex;
-      // justify-content: center;
-      // align-items: center;
       cursor: text;
       &:empty{
         &::before{

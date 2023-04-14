@@ -13,14 +13,14 @@ import generate from './views/generate.vue';
 import parse from './views/parse.vue';
 import settings from './views/settings.vue';
 
-import {shallowRef, markRaw, reactive, DefineComponent} from 'vue'
+import {shallowRef, markRaw } from 'vue'
 
 interface Views {
   [key: string]: any
 }
 
 const views : Views = markRaw({generate: generate, parse: parse, settings: settings})
-const active = shallowRef(generate)
+const active = shallowRef(parse)
 
 function changeViews (_view: string) {
   if (_view === 'generate') {
