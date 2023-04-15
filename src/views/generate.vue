@@ -1,11 +1,11 @@
 <template>
   <div class="generate">
     <div class="text">
-      <div class="textarea" contenteditable="true"></div>
+      <div class="textarea" contenteditable="true" @change="textChange">baidu.com</div>
     </div>
     <div class="qrcode">
       <div class="qrcode_box">
-        <div class="code">code</div>
+        <div class="code" v-html="code"></div>
         <div class="style">
           <div class="header" @click="changeExpend('style')">
             <span class="hdTitle">STYLE</span>
@@ -57,8 +57,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Down, Up, Download } from '@icon-park/vue-next'
+import { useDebounceFn } from '@vueuse/core'
+import { invoke } from '@tauri-apps/api'
+
+function textChange () {
+  document.querySelector('.textarea')?.addEventListener("DOMSubtreeModified", (e) => {
+    const target = e.target as HTMLOListElement
+    const val = target.textContent
+    generateQrcode(val)
+  }, false)
+}
+
+const code = ref("")
+const generateQrcode = useDebounceFn(async (val) => {
+  console.log('qr', val)
+  const img = await invoke("_generate", { data: val, color: [255, 233, 232, 2] })
+  console.log(img)
+  code.value = img as string
+}, 1000, {maxWait: 5000})
+
+onMounted (async () => {
+  textChange()
+})
 
 const expend = ref('')
 function changeExpend (e: string) {
@@ -85,7 +107,7 @@ function changeExpend (e: string) {
     align-items: center;
     .textarea{
       font-size: 16px;
-      color: #012889;
+      color: #012889 !important;
       max-width: 480px;
       border: none;
       outline: none;
@@ -118,7 +140,6 @@ function changeExpend (e: string) {
       box-shadow: 0 8px 30px rgb(0,0,0,0.12);
       // height: 94%;
       .code{
-        background-color: #fff;
         margin: 60px 100px;
         width: 160px;
         height: 160px;
