@@ -11,7 +11,6 @@ use fast_qr::{
 fn _generate(data: &str, _color: &str, _bg_color: &str) -> String {
     let qrcode = QRBuilder::new(data).build().unwrap();
 
-
     let _svg = SvgBuilder::default()
         .shape_color(Shape::Square, [0, 0, 0, 255])
         .background_color("#FFFF0077")

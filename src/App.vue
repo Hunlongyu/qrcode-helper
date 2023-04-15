@@ -12,8 +12,8 @@ import Navigation from './components/Navigation.vue';
 import generate from './views/generate.vue';
 import parse from './views/parse.vue';
 import settings from './views/settings.vue';
-
-import {shallowRef, markRaw } from 'vue'
+import { listen } from '@tauri-apps/api/event'
+import {shallowRef, markRaw, onMounted } from 'vue'
 
 interface Views {
   [key: string]: any
@@ -33,6 +33,15 @@ function changeViews (_view: string) {
     active.value = views.settings
   }
 }
+
+async function windowFocus () {
+  const ctx = await navigator.clipboard.read()
+  console.log('=== ctx ===', ctx)
+}
+
+onMounted(() => {
+  listen('tauri://focus', windowFocus)
+})
 
 </script>
 
