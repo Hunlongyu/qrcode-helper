@@ -1,4 +1,3 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use fast_qr::{
@@ -6,14 +5,16 @@ use fast_qr::{
     QRBuilder
 };
 
+use image;
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn _generate(data: &str, _color: &str, _bg_color: &str) -> String {
     let qrcode = QRBuilder::new(data).build().unwrap();
 
     let _svg = SvgBuilder::default()
-        .shape_color(Shape::Square, [0, 0, 0, 255])
-        .background_color("#FFFF0077")
+        .shape_color(Shape::Square, "#000000")
+        .background_color("#FFFFFF")
         .to_str(&qrcode);
 
     return _svg;

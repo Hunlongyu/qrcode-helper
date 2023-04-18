@@ -3,6 +3,7 @@
     <div class="parse-left">
       <input id="input-images" type="file" multiple accept="image/*" placeholder="" />
       <div class="tips">拖拽或打开图片文件</div>
+      <div><img src="../assets/01.png" alt="" srcset=""></div>
     </div>
     <div class="parse-right">
       <div class="header">
@@ -10,6 +11,9 @@
       </div>
       <div class="wrapper">
         <div class="list">
+          <div class="item">
+            <button @click="parseEvent">parse</button>
+          </div>
           <div class="item">
             <div class="text">这里是解析后文字</div>
             <div class="btn"><Copy theme="outline" fill="#fff" size="14" /></div>
@@ -62,6 +66,13 @@
 
 <script setup lang="ts">
 import { Clear, Copy, Delete } from '@icon-park/vue-next'
+import { invoke } from '@tauri-apps/api'
+
+async function parseEvent() {
+  const result = await invoke('', { path: "E:\\qrcode-helper\\src\\assets\\01.png" })
+  console.log('=== result ===', result)
+}
+
 </script>
 
 <style lang="scss" scoped>
