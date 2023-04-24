@@ -1,67 +1,35 @@
 <template>
-  <div class="nav">
-    <div class="navList">
-      <span :class="active === 'generate' ? 'navBtn active' : 'navBtn'" @click="changeViewTo('generate')">
-        <AddText theme="outline" :fill="active === 'generate' ? '#fff' : '#00288a'" />
-      </span>
-      <span :class="active === 'parse' ? 'navBtn active' : 'navBtn'" @click="changeViewTo('parse')">
-        <ScanCode theme="outline" :fill="active === 'parse' ? '#fff' : '#00288a'" />
-      </span>
-      <span :class="active === 'settings' ? 'navBtn active' : 'navBtn'" @click="changeViewTo('settings')">
-        <Config theme="outline" :fill="active === 'settings' ? '#fff' : '#00288a'"/>
-      </span>
-    </div>
+  <div class="nav d-flex justify-center align-center">
+    <v-sheet class="rounded-pill d-flex flex-column align-center justify-center" :height="250" :width="80" :elevation="1">
+      <v-btn :class="active === 'generate' ? 'bg-primary' : ''" icon="mdi-format-text"
+        :variant="active === 'generate' ? 'tonal' : 'elevated'" @click="changeViewTo('generate')"></v-btn>
+      <v-btn :class="active === 'parse' ? 'ma-4 bg-primary' : 'ma-4'" icon="mdi-qrcode"
+        :variant="active === 'parse' ? 'tonal' : 'elevated'" @click="changeViewTo('parse')"></v-btn>
+      <v-btn :class="active === 'settings' ? 'bg-primary' : ''" icon="mdi-cog-outline"
+        :variant="active === 'settings' ? 'tonal' : 'elevated'" @click="changeViewTo('settings')"></v-btn>
+    </v-sheet>
   </div>
 </template>
 
 <script setup lang="ts">
-import { AddText, ScanCode, Config } from '@icon-park/vue-next'
-import { ref } from 'vue';
-
+import { ref } from 'vue'
+import { useTheme } from 'vuetify'
 
 const active = ref('generate')
+const theme = useTheme()
 
 const emit = defineEmits(["changeView"])
 
 function changeViewTo(view: string) {
   active.value = view
   emit("changeView", view)
+  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
 }
 </script>
 
 <style lang="scss">
-.nav{
+.nav {
   width: 140px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  .navList{
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-    padding: 40px 12px;
-    border-radius: 45px;
-    box-shadow: 0 8px 30px rgb(0,0,0,0.12);
-    justify-content: center;
-    align-items: center;
-    span{
-      width: 50px;
-      height: 50px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 50%;
-      margin: 5px 0;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      &.active{
-        background-color: #00288a;
-        box-shadow: 0 0 1px 1px #e0e0ea;
-      }
-      &:hover{
-        box-shadow: 0 10px 10px -7px rgba(255, 0, 166, 0.25), 0 -10px 10px -7px rgba(0, 162, 255, 0.25), -10px 0 10px -7px rgba(255, 98, 0, 0.25), 10px 0 10px -7px rgba(0, 255, 47, 0.25);
-      }
-    }
-  }
+  height: 100%;
 }
 </style>
