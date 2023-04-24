@@ -5,8 +5,6 @@ use fast_qr::{
     QRBuilder
 };
 
-use image;
-
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn _generate(data: &str, _color: &str, _bg_color: &str) -> String {

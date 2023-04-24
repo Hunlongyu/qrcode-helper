@@ -1,9 +1,8 @@
 <template>
   <div class="parse">
     <div class="parse-left">
-      <input id="input-images" type="file" multiple accept="image/*" placeholder="" />
+      <input id="input-images" type="file" multiple accept="image/*" @change="handleFileUpload" />
       <div class="tips">拖拽或打开图片文件</div>
-      <div><img src="../assets/01.png" alt="" srcset=""></div>
     </div>
     <div class="parse-right">
       <div class="header">
@@ -11,52 +10,9 @@
       </div>
       <div class="wrapper">
         <div class="list">
-          <div class="item">
-            <button @click="parseEvent">parse</button>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
+          <div class="item" v-for="(item, idx) in resultList" :key="idx">
+            <div class="text">{{item}}</div>
             <div class="btn"><Copy theme="outline" fill="#fff" size="14" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字这里是解析后文字这里是解析后文字这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
-          </div>
-          <div class="item">
-            <div class="text">这里是解析后文字</div>
-            <div class="btn"><Copy theme="outline" fill="#fff" /></div>
           </div>
         </div>
       </div>
@@ -66,11 +22,51 @@
 
 <script setup lang="ts">
 import { Clear, Copy, Delete } from '@icon-park/vue-next'
-import { invoke } from '@tauri-apps/api'
+import jsQR from 'jsqr'
+import { ref, Ref } from 'vue';
+
+const resultList: Ref<String[]> = ref([])
+
+function handleFileUpload (event: Event) {
+  const target = event.target as HTMLInputElement
+  if (target) {
+    const files = target.files
+    if (files && files.length > 0) {
+      for (let i = 0; i < files.length; i++) {
+        parseFile(files[i])
+      }
+    }
+  }
+}
+
+// 解析单个二维码文件
+function parseFile (file: File) {
+  let result = ''
+  const reader = new FileReader()
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return result
+      ctx.drawImage(img, 0, 0, img.width, img.height)
+      const imageData = ctx.getImageData(0, 0, img.width, img.height)
+      const qrCode = jsQR(imageData.data, imageData.width, imageData.height)
+      if (qrCode && qrCode.data && qrCode.data != '') {
+        resultList.value.push(qrCode.data)
+      } else {
+        console.log('=== kong ===')
+      }
+    }
+    img.src = reader.result as string
+  }
+  reader.readAsDataURL(file)
+}
 
 async function parseEvent() {
-  const result = await invoke('', { path: "E:\\qrcode-helper\\src\\assets\\01.png" })
-  console.log('=== result ===', result)
+  
 }
 
 </script>

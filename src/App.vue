@@ -40,7 +40,7 @@ async function windowFocus () {
 }
 
 onMounted(() => {
-  listen('tauri://focus', windowFocus)
+  // listen('tauri://focus', windowFocus)
 })
 
 </script>

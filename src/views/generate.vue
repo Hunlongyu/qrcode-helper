@@ -72,11 +72,9 @@ function textChange () {
 
 const code = ref('')
 const generateQrcode = useDebounceFn(async (val) => {
-  console.log('qr', val)
   const img = await invoke('_generate', { data: val, color: '#000000', bgColor: '#ffffff' })
-  console.log(img)
   code.value = img as string
-}, 1000, {maxWait: 5000})
+}, 500, {maxWait: 3000})
 
 onMounted (async () => {
   textChange()
