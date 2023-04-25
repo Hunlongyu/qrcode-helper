@@ -9,3 +9,6 @@ https://vuetifyjs.com/en/components/buttons/
 
 ## Icon
 https://pictogrammers.com/library/mdi/
+
+## Vue Use
+https://vueuse.org/shared/createGlobalState/
