@@ -6,15 +6,15 @@
     </div>
     <div class="parse-right">
       <div class="header">
-        <Delete />
-        <Clear />
+        <!-- <Delete />
+        <Clear /> -->
       </div>
       <div class="wrapper">
         <div class="list">
           <div class="item" v-for="(item, idx) in resultList" :key="idx">
             <div class="text">{{ item }}</div>
             <div class="btn">
-              <Copy theme="outline" fill="#fff" size="14" />
+              <!-- <Copy theme="outline" fill="#fff" size="14" /> -->
             </div>
           </div>
         </div>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { Clear, Copy, Delete } from '@icon-park/vue-next'
+// import { Clear, Copy, Delete } from '@icon-park/vue-next'
 import jsQR from 'jsqr'
 import { ref, Ref } from 'vue';
 

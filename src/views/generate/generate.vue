@@ -4,11 +4,11 @@
       <v-tab :value="1">单个生成</v-tab>
       <v-tab :value="2">批量生成</v-tab>
     </v-tabs>
-    <v-window v-model="tab">
-      <v-window-item :value="1">
+    <v-window v-model="tab" style="height: calc(100% - 40px);">
+      <v-window-item :value="1" style="height: 100%;">
         <single />
       </v-window-item>
-      <v-window-item :value="2">
+      <v-window-item :value="2" style="height: 100%;">
         <multiple />
       </v-window-item>
     </v-window>
@@ -16,31 +16,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useDebounceFn } from '@vueuse/core'
-import { invoke } from '@tauri-apps/api'
+import { ref, onMounted } from 'vue'
 import single from './single.vue'
 import multiple from './multiple.vue'
 
 const tab = ref(1)
 
 
-function textChange() {
-  document.querySelector('.textarea')?.addEventListener("DOMSubtreeModified", (e) => {
-    const target = e.target as HTMLOListElement
-    const val = target.textContent
-    generateQrcode(val)
-  }, false)
-}
-
-const code = ref('')
-const generateQrcode = useDebounceFn(async (val) => {
-  const img = await invoke('_generate', { data: val, color: '#000000', bgColor: '#ffffff' })
-  code.value = img as string
-}, 500, { maxWait: 3000 })
 
 onMounted(async () => {
-  textChange()
 })
 
 const expend = ref('')
