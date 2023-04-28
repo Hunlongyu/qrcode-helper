@@ -117,7 +117,7 @@ function showSettingsHandle() {
 }
 
 async function saveAs() {
-  const isOk = await invoke('_save_svg', { data: text.value, color: gridColor.value, bgColor: bgColor.value, path: 'C:\\Users\\hunlongyu\\Desktop\\test\\' + name.value + '.svg' })
+  const isOk = await invoke('_save_png', { data: text.value, color: gridColor.value, bgColor: bgColor.value, path: 'C:\\Users\\hunlongyu\\Desktop\\test\\' + name.value + '.png', size: size.value })
   snkTxt.value = isOk ? '保存成功' : '保存失败'
   snackbar.value = true
 }
