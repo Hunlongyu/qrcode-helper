@@ -68,8 +68,9 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useDebounceFn, useNow, useDateFormat, useTimestamp } from '@vueuse/core'
-import { invoke } from '@tauri-apps/api'
+import { useDebounceFn, useNow, useDateFormat, useTimestamp, useBase64 } from '@vueuse/core'
+import { invoke, clipboard } from '@tauri-apps/api'
+import { CanvasHTMLAttributes } from 'vue';
 
 const text = ref('')
 function textChange() {
@@ -122,8 +123,10 @@ async function saveAs() {
   snackbar.value = true
 }
 
-function copyHandle() { }
-
+async function copyHandle() {
+  const isOk = await invoke('_copy_to_clipboard', { data: text.value, color: gridColor.value, bgColor: bgColor.value, size: size.value })
+  console.log('=== isOk ===', isOk)
+}
 </script>
 <style lang="scss" scoped>
 .single-container {

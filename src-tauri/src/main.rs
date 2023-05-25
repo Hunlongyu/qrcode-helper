@@ -1,10 +1,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use fast_qr::{
-    convert::{Builder, Shape, svg::SvgBuilder},
-    QRBuilder
+    convert::{image::ImageBuilder, svg::SvgBuilder, Builder, Shape},
+    QRBuilder,
 };
-use resvg::{*, usvg::TreeParsing};
+
+use clippers;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -26,32 +27,49 @@ fn _save_svg(data: &str, _color: &str, _bg_color: &str, path: &str) -> bool {
         .to_file(&qrcode, path);
     match _svg {
         Ok(_) => true,
-        Err(_) => false
+        Err(_) => false,
     }
-}
-
-fn save_svg_as_png( svg_string: &str, output_path: &str, size: u32) -> Result<(), Box<dyn std::error::Error>> {
-    let tree = resvg::usvg::Tree::from_str(svg_string, &resvg::usvg::Options::default()).map_err(|err| format!("svg 解析错误：{}", err))?;
-    let mut pixmap = tiny_skia::Pixmap::new(size, size).unwrap();
-    resvg::render(&tree, FitTo::Size(size, size), tiny_skia::Transform::default(), pixmap.as_mut()).unwrap();
-    pixmap.save_png(output_path).unwrap();
-    Ok(())
 }
 
 #[tauri::command]
 fn _save_png(data: &str, _color: &str, _bg_color: &str, path: &str, size: u32) -> bool {
-    let _svg = _generate(data, _color, _bg_color);
-    let is_ok = save_svg_as_png(&_svg, path, size);
-    match is_ok {
+    let _svg = QRBuilder::new(data).build().unwrap();
+    let _image = ImageBuilder::default()
+        .shape_color(Shape::Square, _color)
+        .background_color(_bg_color)
+        .fit_height(size)
+        .to_file(&_svg, path);
+    match _image {
         Ok(_) => return true,
-        Err(_) => return false
+        Err(_) => return false,
     }
 }
 
+#[tauri::command]
+fn _copy_to_clipboard(data: &str, _color: &str, _bg_color: &str, size: u32) -> bool {
+    let _svg = QRBuilder::new(data).build().unwrap();
+    let _image = ImageBuilder::default()
+        .shape_color(Shape::Square, _color)
+        .background_color(_bg_color)
+        .fit_height(size)
+        .to_pixmap(&_svg);
+    let mut buf = _image.encode_png().unwrap();
+    let dimg = image::load_from_memory_with_format(&mut buf, image::ImageFormat::Png).unwrap();
+    let rgba_img = dimg.to_rgba8();
+    let mut cp = clippers::Clipboard::get();
+    cp.write_image(rgba_img.width(), rgba_img.height(), &rgba_img.as_raw())
+        .unwrap();
+    return true;
+}
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![_generate, _save_svg, _save_png])
+        .invoke_handler(tauri::generate_handler![
+            _generate,
+            _save_svg,
+            _save_png,
+            _copy_to_clipboard
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
