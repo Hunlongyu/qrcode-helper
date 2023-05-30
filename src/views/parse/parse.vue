@@ -1,8 +1,8 @@
 <template>
-  <v-container class="generate overflow-hide">
+  <v-container class="parse overflow-hide">
     <v-tabs v-model="tab" align-tabs="end">
-      <v-tab :value="1">单个生成</v-tab>
-      <v-tab :value="2">批量生成</v-tab>
+      <v-tab :value="1">单个解析</v-tab>
+      <v-tab :value="2">批量解析</v-tab>
     </v-tabs>
     <v-window v-model="tab" style="height: calc(100% - 40px);">
       <v-window-item :value="1" style="height: 100%;">
@@ -24,7 +24,7 @@ const tab = ref(1)
 </script>
 
 <style lang="scss" scoped>
-.generate {
+.parse {
   flex-grow: 1;
 }
 </style>

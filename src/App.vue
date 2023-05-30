@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import Navigation from './components/Navigation.vue';
 import generate from './views/generate/generate.vue';
-import parse from './views/parse.vue';
+import parse from './views/parse/parse.vue';
 import settings from './views/settings.vue';
 import { listen } from '@tauri-apps/api/event'
 import { shallowRef, markRaw, onMounted } from 'vue'
@@ -22,7 +22,7 @@ interface Views {
 }
 
 const views: Views = markRaw({ generate: generate, parse: parse, settings: settings })
-const active = shallowRef(generate)
+const active = shallowRef(parse)
 
 function changeViews(_view: string) {
   if (_view === 'generate') {

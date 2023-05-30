@@ -77,6 +77,7 @@ async function parseEvent() {
 <style lang="scss" scoped>
 .parse {
   flex-grow: 1;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
