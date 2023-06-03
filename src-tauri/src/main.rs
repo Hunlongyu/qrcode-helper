@@ -38,7 +38,7 @@ async fn _copy_to_clipboard(data: String, color: String, bg_color: String, size:
 
 // 解析指定二维码图片
 #[tauri::command]
-async fn _parse_image(path: String, lib: String) -> String {
+async fn _parse_image(path: String, lib: Option<String>) -> String {
     let handle = tokio::task::spawn(parse::parse_image(path, lib));
     let result = handle.await.unwrap();
     return result;

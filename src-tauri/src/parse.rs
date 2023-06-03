@@ -6,7 +6,8 @@ use std::collections::HashSet;
 use tokio;
 
 // 指定解析库来解析指定二维码图片
-pub async fn parse_image(path: String, lib: String) -> String {
+pub async fn parse_image(path: String, lib: Option<String>) -> String {
+    let lib = lib.unwrap_or_else(|| "rxing".to_string());
     if lib == "rqrr".to_string() {
         let p = path.clone();
         let handle = tokio::task::spawn(parse_image_rqrr(p));
