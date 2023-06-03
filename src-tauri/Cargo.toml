@@ -13,11 +13,13 @@ edition = "2021"
 tauri-build = { version = "^1.0", features = [] }
 
 [dependencies]
-tauri = { version = "^1.0", features = ["clipboard", "clipboard-all", "shell-open"] }
+tauri = { version = "^1.0", features = ["clipboard", "clipboard-all", "dialog-open", "shell-open"] }
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
-fast_qr = {version="0.9.0", features= ["image"] }
+tokio = "^1.28"
+image = "^0.24"
 resvg = { version = "0.28.0", optional = true }
-image = "0.24.6"
-clippers = "0.1.2"
-rqrr = "0.6.0"
+fast_qr = {version="0.9.0", features= ["image"] }
+rxing = "^0.4"
+clippers = "^0.1"
+rqrr = "^0.6"

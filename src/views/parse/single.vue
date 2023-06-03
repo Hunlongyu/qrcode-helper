@@ -1,7 +1,7 @@
 <template>
   <div class="parse">
     <div class="parse-left">
-      <input id="input-images" type="file" multiple accept="image/*" @change="handleFileUpload" />
+      <div id="input-images" @click="parseSingleImage"></div>
       <div class="tips">拖拽或打开图片文件</div>
     </div>
     <div class="parse-right">
@@ -25,22 +25,33 @@
 
 <script setup lang="ts">
 // import { Clear, Copy, Delete } from '@icon-park/vue-next'
+import { dialog, invoke } from '@tauri-apps/api';
 import jsQR from 'jsqr'
 import { ref, Ref } from 'vue';
 
 const resultList: Ref<String[]> = ref([])
 
-function handleFileUpload(event: Event) {
-  const target = event.target as HTMLInputElement
-  if (target) {
-    const files = target.files
-    if (files && files.length > 0) {
-      for (let i = 0; i < files.length; i++) {
-        parseFile(files[i])
-      }
-    }
+
+const parseSingleImage = async () => {
+  const path = await dialog.open({ directory: false });
+  console.log('=== path ===', path)
+  if (path !== '') {
+    const res = await invoke('_parse_image', { path, lib: 'all' })
+    console.log('=== res ===', res)
   }
 }
+
+// function handleFileUpload(event: Event) {
+//   const target = event.target as HTMLInputElement
+//   if (target) {
+//     const files = target.files
+//     if (files && files.length > 0) {
+//       for (let i = 0; i < files.length; i++) {
+//         parseFile(files[i])
+//       }
+//     }
+//   }
+// }
 
 // 解析单个二维码文件
 function parseFile(file: File) {

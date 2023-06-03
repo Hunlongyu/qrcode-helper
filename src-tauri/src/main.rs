@@ -1,65 +1,47 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use fast_qr::{
-    convert::{image::ImageBuilder, svg::SvgBuilder, Builder, Shape},
-    QRBuilder,
-};
+use tokio;
+mod generate;
+mod parse;
 
-use clippers;
-
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+// 生成 svg 字符串
 #[tauri::command]
-fn _generate(data: &str, _color: &str, _bg_color: &str) -> String {
-    let qrcode = QRBuilder::new(data).build().unwrap();
-    let _svg = SvgBuilder::default()
-        .shape_color(Shape::Square, _color)
-        .background_color(_bg_color)
-        .to_str(&qrcode);
-    return _svg;
+async fn _generate(data: String, color: String, bg_color: String) -> String {
+    let handle = tokio::task::spawn(generate::generate(data, color, bg_color));
+    let result = handle.await.unwrap();
+    return result;
 }
 
+// 保存 svg 文件到本地
 #[tauri::command]
-fn _save_svg(data: &str, _color: &str, _bg_color: &str, path: &str) -> bool {
-    let qrcode = QRBuilder::new(data).build().unwrap();
-    let _svg = SvgBuilder::default()
-        .shape_color(Shape::Square, _color)
-        .background_color(_bg_color)
-        .to_file(&qrcode, path);
-    match _svg {
-        Ok(_) => true,
-        Err(_) => false,
-    }
+async fn _save_svg(data: String, color: String, bg_color: String, path: String) -> bool {
+    let handle = tokio::task::spawn(generate::save_svg(data, color, bg_color, path));
+    let result = handle.await.unwrap();
+    return result;
 }
 
+// 保存 png 文件到本地
 #[tauri::command]
-fn _save_png(data: &str, _color: &str, _bg_color: &str, path: &str, size: u32) -> bool {
-    let _svg = QRBuilder::new(data).build().unwrap();
-    let _image = ImageBuilder::default()
-        .shape_color(Shape::Square, _color)
-        .background_color(_bg_color)
-        .fit_height(size)
-        .to_file(&_svg, path);
-    match _image {
-        Ok(_) => return true,
-        Err(_) => return false,
-    }
+async fn _save_png(data: String, color: String, bg_color: String, path: String, size: u32) -> bool {
+    let handle = tokio::task::spawn(generate::save_png(data, color, bg_color, path, size));
+    let result = handle.await.unwrap();
+    return result;
 }
 
+// 复制 png 到剪贴板
 #[tauri::command]
-fn _copy_to_clipboard(data: &str, _color: &str, _bg_color: &str, size: u32) -> bool {
-    let _svg = QRBuilder::new(data).build().unwrap();
-    let _image = ImageBuilder::default()
-        .shape_color(Shape::Square, _color)
-        .background_color(_bg_color)
-        .fit_height(size)
-        .to_pixmap(&_svg);
-    let mut buf = _image.encode_png().unwrap();
-    let dimg = image::load_from_memory_with_format(&mut buf, image::ImageFormat::Png).unwrap();
-    let rgba_img = dimg.to_rgba8();
-    let mut cp = clippers::Clipboard::get();
-    cp.write_image(rgba_img.width(), rgba_img.height(), &rgba_img.as_raw())
-        .unwrap();
-    return true;
+async fn _copy_to_clipboard(data: String, color: String, bg_color: String, size: u32) -> bool {
+    let handle = tokio::task::spawn(generate::copy_to_clipboard(data, color, bg_color, size));
+    let result = handle.await.unwrap();
+    return result;
+}
+
+// 解析指定二维码图片
+#[tauri::command]
+async fn _parse_image(path: String, lib: String) -> String {
+    let handle = tokio::task::spawn(parse::parse_image(path, lib));
+    let result = handle.await.unwrap();
+    return result;
 }
 
 fn main() {
@@ -68,7 +50,8 @@ fn main() {
             _generate,
             _save_svg,
             _save_png,
-            _copy_to_clipboard
+            _copy_to_clipboard,
+            _parse_image,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
