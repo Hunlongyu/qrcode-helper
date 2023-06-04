@@ -1,199 +1,119 @@
 <template>
-  <div class="parse">
-    <div class="parse-left">
-      <div id="input-images" @click="parseSingleImage"></div>
-      <div class="tips">拖拽或打开图片文件</div>
-    </div>
-    <div class="parse-right">
-      <div class="header">
-        <!-- <Delete />
-        <Clear /> -->
-      </div>
-      <div class="wrapper">
-        <div class="list">
-          <div class="item" v-for="(item, idx) in resultList" :key="idx">
-            <div class="text">{{ item }}</div>
-            <div class="btn">
-              <!-- <Copy theme="outline" fill="#fff" size="14" /> -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <v-container fluid class="single-container">
+    <v-row class="single-wrapper">
+      <v-col class="d-flex justify-center align-center parse_left">
+        <div id="input-images" @click="parseImages"></div>
+        <div class="tips">拖拽或选择图片文件</div>
+      </v-col>
+      <v-col class="d-flex justify-center align-center parse_right">
+        <v-sheet class="rounded-lg d-flex justify-center flex-column align-center" :width="400" :elevation="4"
+          :max-height="600">
+          <v-list lines="two" class="content_list">
+            <v-list-item v-for="(item, index) in resultList" variant="plain">
+              <v-list-item-subtitle @click="handleCheck(item)">
+                {{ item.content }}
+              </v-list-item-subtitle>
+              <template v-slot:append>
+                <v-btn size="x-small" icon="mdi-content-copy" variant="text" @click="handleCopy(item)"></v-btn>
+                <v-btn size="x-small" icon="mdi-delete" variant="text" @click="handleDelete(index)"></v-btn>
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-sheet>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
-// import { Clear, Copy, Delete } from '@icon-park/vue-next'
-import { dialog, invoke } from '@tauri-apps/api';
-import jsQR from 'jsqr'
+import { dialog, invoke, clipboard, shell } from '@tauri-apps/api';
 import { ref, Ref } from 'vue';
 
-const resultList: Ref<String[]> = ref([])
+const resultList: Ref<Result[]> = ref([])
 
+interface Result {
+  result: boolean
+  content: string
+}
 
-const parseSingleImage = async () => {
-  const path = await dialog.open({ directory: false });
-  console.log('=== path ===', path)
-  if (path !== '') {
-    const res = await invoke('_parse_image', { path, lib: 'all' })
-    console.log('=== res ===', res)
+// 解析
+const parseImages = async () => {
+  const path = await dialog.open({ directory: false, multiple: true, filters: [{ name: '二维码图片', extensions: ['png', 'jpg', 'jpeg'] }] }) as string[];
+  if (path.length) {
+    const res: string = await invoke('_parse_images_with_paths', { path: JSON.stringify(path), lib: 'rxing' }) // rqrr & rxing & all
+    const res_json = JSON.parse(res) as Result[]
+    resultList.value.unshift(...res_json)
   }
 }
 
-// function handleFileUpload(event: Event) {
-//   const target = event.target as HTMLInputElement
-//   if (target) {
-//     const files = target.files
-//     if (files && files.length > 0) {
-//       for (let i = 0; i < files.length; i++) {
-//         parseFile(files[i])
-//       }
-//     }
-//   }
-// }
-
-// 解析单个二维码文件
-function parseFile(file: File) {
-  let result = ''
-  const reader = new FileReader()
-  reader.onload = () => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = img.width
-      canvas.height = img.height
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return result
-      ctx.drawImage(img, 0, 0, img.width, img.height)
-      const imageData = ctx.getImageData(0, 0, img.width, img.height)
-      const qrCode = jsQR(imageData.data, imageData.width, imageData.height)
-      if (qrCode && qrCode.data && qrCode.data != '') {
-        resultList.value.push(qrCode.data)
-      } else {
-        console.log('=== kong ===')
-      }
-    }
-    img.src = reader.result as string
+// 
+const handleCheck = async (item: Result) => {
+  const urlRegExp = /^(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+$/
+  const isUrl = urlRegExp.test(item.content)
+  if (isUrl) {
+    shell.open(item.content)
   }
-  reader.readAsDataURL(file)
 }
 
-async function parseEvent() {
+// 复制内容到剪贴板
+const handleCopy = async (item: Result) => {
+  await clipboard.writeText(item.content)
+}
 
+// 删除指定序号的数据
+const handleDelete = (idx: number) => {
+  resultList.value.splice(idx, 1)
 }
 
 </script>
 
 <style lang="scss" scoped>
-.parse {
-  flex-grow: 1;
+.single-container {
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 
-  .parse-left {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    z-index: 1;
+  .single-wrapper {
+    height: 100%;
 
-    &::before {
-      position: absolute;
-      content: "";
-      width: 100px;
-      height: 6px;
-      background-color: #c8dbf3;
-      z-index: 2;
-    }
-
-    &::after {
-      position: absolute;
-      content: "";
-      width: 6px;
-      height: 100px;
-      background-color: #c8dbf3;
-      z-index: 3;
-    }
-
-    #input-images {
-      width: 400px;
-      height: 200px;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 4;
-    }
-
-    .tips {
-      color: #889fc4;
-    }
-  }
-
-  .parse-right {
-    width: 360px;
-    background-color: #00288a;
-    margin: 20px 25px;
-    border-radius: 20px;
-    display: flex;
-    justify-content: center;
-    padding: 20px 0px;
-    align-items: center;
-    box-shadow: 0 8px 30px rgb(0, 0, 0, 0.12);
-    flex-direction: column;
-
-    .wrapper {
-      display: flex;
-      width: 100%;
+    .parse_left {
       height: 100%;
-      min-height: 400px;
-      position: relative;
-      overflow-y: scroll;
+      width: 100%;
+      flex-direction: column;
+      z-index: 1;
 
-      &::-webkit-scrollbar {
-        width: 10px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background: #00000077;
-      }
-
-      .list {
+      &::before {
         position: absolute;
+        content: "";
+        width: 100px;
+        height: 6px;
+        background-color: #c8dbf3;
+        z-index: 2;
+      }
 
-        .item {
-          margin-bottom: 10px;
-          background-color: #113a9f;
-          border-radius: 8px;
-          font-size: 14px;
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          overflow: hidden;
-          margin-left: 20px;
-          margin-right: 10px;
+      &::after {
+        position: absolute;
+        content: "";
+        width: 6px;
+        height: 100px;
+        background-color: #c8dbf3;
+        z-index: 3;
+      }
 
-          .text {
-            display: flex;
-            justify-content: start;
-            padding: 10px 20px;
-          }
+      #input-images {
+        width: 400px;
+        height: 200px;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 4;
+      }
 
-          .btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            padding: 10px 20px 8px;
+      .tips {
+        color: #889fc4;
+      }
+    }
 
-            &:hover {
-              background-color: #ff9b05;
-            }
-          }
-        }
+    .parse_right {
+      .content_list {
+        width: 100%;
       }
     }
   }

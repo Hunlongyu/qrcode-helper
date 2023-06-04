@@ -69,8 +69,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useDebounceFn, useNow, useDateFormat, useTimestamp, useBase64 } from '@vueuse/core'
-import { invoke, clipboard } from '@tauri-apps/api'
-import { CanvasHTMLAttributes } from 'vue';
+import { invoke } from '@tauri-apps/api'
 
 const text = ref('')
 function textChange() {

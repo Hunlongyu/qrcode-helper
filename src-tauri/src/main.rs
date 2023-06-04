@@ -36,10 +36,10 @@ async fn _copy_to_clipboard(data: String, color: String, bg_color: String, size:
     return result;
 }
 
-// 解析指定二维码图片
+// 解析指定路径二维码图片
 #[tauri::command]
-async fn _parse_image(path: String, lib: Option<String>) -> String {
-    let handle = tokio::task::spawn(parse::parse_image(path, lib));
+async fn _parse_images_with_paths(path: String, lib: Option<String>) -> String {
+    let handle = tokio::task::spawn(parse::parse_images_with_paths(path, lib));
     let result = handle.await.unwrap();
     return result;
 }
@@ -51,7 +51,7 @@ fn main() {
             _save_svg,
             _save_png,
             _copy_to_clipboard,
-            _parse_image,
+            _parse_images_with_paths,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -14,7 +14,5 @@ https://pictogrammers.com/library/mdi/
 https://vueuse.org/shared/createGlobalState/
 
 ### 解析
-1. 解析文件时，要判断是否是图片。
-2. 解析本地图片
-3. 解析联网图片
 4. 解析拖拽图片
+5. 解析 svg 格式的图片
