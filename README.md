@@ -11,6 +11,8 @@ https://vueuse.org/shared/createGlobalState/
 1. 全局快捷键截图识别屏幕二维码 http://xsnip.cn/
 2. 全局快捷键唤醒软件
 3. 唤醒软件后识别剪贴板，如果是文字提示转化成二维码，如果是图片提示解析内容
+4. github action https://github.com/tauri-apps/tauri-action
+5. software update
 
 ### 生成
 1. 批量生成
@@ -23,7 +25,7 @@ https://vueuse.org/shared/createGlobalState/
 3. 解析指定目录下所有二维码图片，包含子目录
 
 ### 设置
-1. 选择一个数据存储库（js、rust、indexedDB）
+1. 选择一个数据存储库（js、rust、indexedDB）localforage
 2. 主题（黑、白、系统）
 3. 二维码保存路径
 4. 二维码尺寸、方块颜色、背景色

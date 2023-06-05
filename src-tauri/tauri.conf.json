@@ -2,7 +2,7 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:1420",
+    "devPath": "http://127.0.0.1:1431",
     "distDir": "../dist",
     "withGlobalTauri": false
   },
@@ -51,7 +51,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "qrcode-helper",
+        "title": "二维码助手",
         "width": 1080,
         "height": 740
       }

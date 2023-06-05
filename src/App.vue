@@ -22,7 +22,7 @@ interface Views {
 }
 
 const views: Views = markRaw({ generate: generate, parse: parse, settings: settings })
-const active = shallowRef(parse)
+const active = shallowRef(settings)
 
 function changeViews(_view: string) {
   if (_view === 'generate') {

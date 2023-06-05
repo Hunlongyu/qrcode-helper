@@ -28,7 +28,7 @@
 import { ref } from 'vue'
 import { useTheme } from 'vuetify'
 
-const active = ref('generate')
+const active = ref('settings')
 const theme = useTheme()
 
 const emit = defineEmits(["changeView"])

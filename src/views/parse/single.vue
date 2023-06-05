@@ -6,8 +6,8 @@
         <div class="tips">拖拽或选择图片文件</div>
       </v-col>
       <v-col class="d-flex justify-center align-center parse_right">
-        <v-sheet class="rounded-lg d-flex justify-center flex-column align-center" :width="400" :elevation="4"
-          :max-height="600">
+        <v-sheet class="rounded-lg d-flex justify-center flex-column align-center" :width="400"
+          :elevation="resultList.length > 0 ? 4 : 0" :max-height="600">
           <v-list lines="two" class="content_list">
             <v-list-item v-for="(item, index) in resultList" variant="plain">
               <v-list-item-subtitle @click="handleCheck(item)">
@@ -46,7 +46,7 @@ const parseImages = async () => {
   }
 }
 
-// 
+// 检查是否是链接
 const handleCheck = async (item: Result) => {
   const urlRegExp = /^(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+$/
   const isUrl = urlRegExp.test(item.content)
