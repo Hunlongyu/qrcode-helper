@@ -26,17 +26,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useTheme } from 'vuetify'
 
 const active = ref('settings')
-const theme = useTheme()
 
 const emit = defineEmits(["changeView"])
 
 function changeViewTo(view: string) {
   active.value = view
   emit("changeView", view)
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
 }
 </script>
 

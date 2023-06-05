@@ -5,7 +5,7 @@
       <v-divider></v-divider>
     </v-row>
     <v-row class="mt-4">
-      <v-btn-toggle v-model="db.theme" borderless variant="outlined">
+      <v-btn-toggle v-model="db.theme" borderless variant="outlined" @click="changeTheme">
         <v-btn value="light">
           <span class="hidden-sm-and-down">light</span>
           <v-icon end>
@@ -16,12 +16,6 @@
           <span class="hidden-sm-and-down">dark</span>
           <v-icon end>
             mdi-weather-night
-          </v-icon>
-        </v-btn>
-        <v-btn value="system">
-          <span class="hidden-sm-and-down">System</span>
-          <v-icon end>
-            mdi-theme-light-dark
           </v-icon>
         </v-btn>
       </v-btn-toggle>
@@ -59,9 +53,11 @@
 </template>
 
 <script setup lang="ts">
-import localforage from 'localforage';
-import { onMounted } from 'vue';
-import { reactive } from 'vue'
+import localforage from 'localforage'
+import { reactive, onMounted } from 'vue'
+import { useTheme } from 'vuetify'
+
+const theme = useTheme()
 
 const db = reactive({
   theme: 'system',
@@ -122,7 +118,8 @@ const update = [
 ]
 
 const getDB = async () => {
-  db.theme = await localforage.getItem('theme') || 'system'
+  db.theme = await localforage.getItem('theme') || 'dark'
+  db.theme === 'dark' ? theme.global.name.value = 'dark' : theme.global.name.value = 'light'
   db.qrcode.save = await localforage.getItem('qrcode.save') || './'
   db.qrcode.size = await localforage.getItem('qrcode.size') || 256
   db.qrcode.color = await localforage.getItem('qrcode.color') || '#000000'
@@ -132,6 +129,11 @@ const getDB = async () => {
   db.app.close = await localforage.getItem('app.close') || 'mini'
   db.app.autoLaunch = await localforage.getItem('app.autoLaunch') || false
   db.app.update = await localforage.getItem('app.update') || true
+}
+
+const changeTheme = async () => {
+  theme.global.name.value = db.theme
+  await localforage.setItem('theme', db.theme)
 }
 
 onMounted(async () => {
