@@ -44,7 +44,7 @@
           </template>
           <v-sheet>
             <v-color-picker class="ma-3" v-model="bgColor" @update:model-value="textChange"
-              :modes="['hexa']"></v-color-picker>
+              :modes="['hex']"></v-color-picker>
           </v-sheet>
         </v-dialog>
         <v-dialog v-model="gridDialog" width="auto">
@@ -55,7 +55,7 @@
           </template>
           <v-sheet>
             <v-color-picker class="ma-3" v-model="gridColor" @update:model-value="textChange"
-              :modes="['hexa']"></v-color-picker>
+              :modes="['hex']"></v-color-picker>
           </v-sheet>
         </v-dialog>
       </v-sheet>

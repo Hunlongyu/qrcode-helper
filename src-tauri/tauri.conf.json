@@ -2,7 +2,7 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
-    "devPath": "http://127.0.0.1:1431",
+    "devPath": "http://localhost:1431",
     "distDir": "../dist",
     "withGlobalTauri": false
   },
@@ -26,7 +26,10 @@
         "confirm": false,
         "message": false,
         "open": true,
-        "save": false
+        "save": true
+      },
+      "path": {
+        "all": true
       }
     },
     "bundle": {

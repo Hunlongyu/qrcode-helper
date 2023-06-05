@@ -24,12 +24,16 @@
       二维码<v-divider></v-divider>
     </v-row>
     <v-row class="mt-6">
-      <v-text-field label="二维码默认保存路径" class="mr-4" v-model="db.qrcode.save" variant="solo-inverted"></v-text-field>
-      <v-text-field label="二维码尺寸" v-model="db.qrcode.size" variant="solo-inverted"></v-text-field>
+      <v-text-field label="二维码默认保存路径" class="mr-4" v-model="db.qrcode.save" variant="solo-inverted"
+        @click="changeQrcodeSave"></v-text-field>
+      <v-select label="二维码尺寸" :items="[32, 64, 128, 256, 512, 1024]" v-model="db.qrcode.size" variant="solo-inverted"
+        @update:modelValue="changeQrcodeSize"></v-select>
     </v-row>
     <v-row class="d-flex justify-space-between mt-2">
-      <v-text-field label="二维码方块颜色" class="mr-4" v-model="db.qrcode.color" variant="solo-inverted"></v-text-field>
-      <v-text-field label="二维码背景颜色" v-model="db.qrcode.bg_color" variant="solo-inverted"></v-text-field>
+      <v-text-field label="二维码方块颜色" class="mr-4" v-model="db.qrcode.color" variant="solo-inverted"
+        @update:modelValue="changeQrcodeColor"></v-text-field>
+      <v-text-field label="二维码背景颜色" v-model="db.qrcode.bg_color" variant="solo-inverted"
+        @update:modelValue="changeQrcodeBgColor"></v-text-field>
     </v-row>
     <v-row class="mt-8">
       快捷键<v-divider></v-divider>
@@ -42,17 +46,18 @@
       其他<v-divider></v-divider>
     </v-row>
     <v-row class="mt-6">
-      <v-autocomplete label="软件关闭时" v-model="db.app.close" :items="close" item-text="title"
-        item-value="value"></v-autocomplete>
+      <v-autocomplete label="软件关闭时" v-model="db.app.close" :items="close" item-text="title" variant="solo-inverted"
+        @change="changeAppClose" item-value="value"></v-autocomplete>
       <v-autocomplete class="mx-4" label="软件开机自启" v-model="db.app.autoLaunch" :items="autoLaunch" item-text="title"
-        item-value="value"></v-autocomplete>
-      <v-autocomplete label="自动更新" v-model="db.app.update" :items="update" item-text="title"
+        variant="solo-inverted" item-value="value"></v-autocomplete>
+      <v-autocomplete label="自动更新" v-model="db.app.update" :items="update" item-text="title" variant="solo-inverted"
         item-value="value"></v-autocomplete>
     </v-row>
   </v-container>
 </template>
 
 <script setup lang="ts">
+import { dialog, path } from '@tauri-apps/api'
 import localforage from 'localforage'
 import { reactive, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
@@ -120,7 +125,7 @@ const update = [
 const getDB = async () => {
   db.theme = await localforage.getItem('theme') || 'dark'
   db.theme === 'dark' ? theme.global.name.value = 'dark' : theme.global.name.value = 'light'
-  db.qrcode.save = await localforage.getItem('qrcode.save') || './'
+  db.qrcode.save = await localforage.getItem('qrcode.save') || ''
   db.qrcode.size = await localforage.getItem('qrcode.size') || 256
   db.qrcode.color = await localforage.getItem('qrcode.color') || '#000000'
   db.qrcode.bg_color = await localforage.getItem('qrcode.bg_color') || '#ffffff'
@@ -136,8 +141,57 @@ const changeTheme = async () => {
   await localforage.setItem('theme', db.theme)
 }
 
+const getDesktopPath = async () => {
+  const desktopDir = await path.desktopDir()
+  if (db.qrcode.save === '' && desktopDir) {
+    db.qrcode.save = desktopDir
+    await localforage.setItem('qrcode.save', desktopDir)
+  }
+}
+
+const changeQrcodeSave = async () => {
+  const savePath = await dialog.open({ directory: true, multiple: false }) as string;
+  if (savePath) {
+    db.qrcode.save = savePath
+    await localforage.setItem('qrcode.save', savePath)
+  }
+}
+
+const changeQrcodeSize = async () => {
+  await localforage.setItem('qrcode.size', db.qrcode.size)
+}
+
+// 检查 hex 颜色值
+const checkColorValue = (item: string) => {
+  const colorRegExp = /^#([0-9A-Fa-f]{6})$/
+  return colorRegExp.test(item)
+}
+
+const changeQrcodeColor = async () => {
+  const isOk = checkColorValue(db.qrcode.color)
+  if (isOk) {
+    await localforage.setItem('qrcode.color', db.qrcode.color)
+  } else {
+    db.qrcode.color = '#000000'
+  }
+}
+
+const changeQrcodeBgColor = async () => {
+  const isOk = checkColorValue(db.qrcode.bg_color)
+  if (isOk) {
+    await localforage.setItem('qrcode.bg_color', db.qrcode.bg_color)
+  } else {
+    db.qrcode.bg_color = '#FFFFFF'
+  }
+}
+
+const changeAppClose = async () => {
+  console.log('=== app ===', db.app.close)
+}
+
 onMounted(async () => {
   await getDB()
+  await getDesktopPath()
 })
 </script>
 
