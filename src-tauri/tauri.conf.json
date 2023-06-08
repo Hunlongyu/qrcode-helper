@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "qrcode-helper",
-    "version": "0.0.0"
+    "version": "0.0.1"
   },
   "tauri": {
     "allowlist": {
@@ -30,6 +30,11 @@
       },
       "path": {
         "all": true
+      },
+      "protocol": {
+        "all": true,
+        "asset": false,
+        "assetScope": []
       }
     },
     "bundle": {
@@ -50,11 +55,16 @@
     "updater": {
       "active": false
     },
+    "systemTray": {
+      "iconPath": "./icons/32x32.png",
+      "title": "QrCode Helper",
+      "menuOnLeftClick": false
+    },
     "windows": [
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "二维码助手",
+        "title": "二维码助手 QrCode Helper",
         "width": 1080,
         "height": 740
       }

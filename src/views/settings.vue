@@ -47,17 +47,17 @@
     </v-row>
     <v-row class="mt-6">
       <v-autocomplete label="软件关闭时" v-model="db.app.close" :items="close" item-text="title" variant="solo-inverted"
-        @change="changeAppClose" item-value="value"></v-autocomplete>
+        @update:modelValue="changeAppClose" item-value="value"></v-autocomplete>
       <v-autocomplete class="mx-4" label="软件开机自启" v-model="db.app.autoLaunch" :items="autoLaunch" item-text="title"
-        variant="solo-inverted" item-value="value"></v-autocomplete>
+        variant="solo-inverted" @update:modelValue="changeAppAutoLaunch" item-value="value"></v-autocomplete>
       <v-autocomplete label="自动更新" v-model="db.app.update" :items="update" item-text="title" variant="solo-inverted"
-        item-value="value"></v-autocomplete>
+        @update:modelValue="changeAppUpdate" item-value="value"></v-autocomplete>
     </v-row>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { dialog, path } from '@tauri-apps/api'
+import { dialog, invoke, path } from '@tauri-apps/api'
 import localforage from 'localforage'
 import { reactive, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
@@ -136,11 +136,13 @@ const getDB = async () => {
   db.app.update = await localforage.getItem('app.update') || true
 }
 
+// 改变主题
 const changeTheme = async () => {
   theme.global.name.value = db.theme
   await localforage.setItem('theme', db.theme)
 }
 
+// 获取用户桌面路径
 const getDesktopPath = async () => {
   const desktopDir = await path.desktopDir()
   if (db.qrcode.save === '' && desktopDir) {
@@ -149,6 +151,7 @@ const getDesktopPath = async () => {
   }
 }
 
+// 改变二维码默认保存路径
 const changeQrcodeSave = async () => {
   const savePath = await dialog.open({ directory: true, multiple: false }) as string;
   if (savePath) {
@@ -157,6 +160,7 @@ const changeQrcodeSave = async () => {
   }
 }
 
+// 改变二维码尺寸
 const changeQrcodeSize = async () => {
   await localforage.setItem('qrcode.size', db.qrcode.size)
 }
@@ -167,6 +171,7 @@ const checkColorValue = (item: string) => {
   return colorRegExp.test(item)
 }
 
+// 改变二维码颜色
 const changeQrcodeColor = async () => {
   const isOk = checkColorValue(db.qrcode.color)
   if (isOk) {
@@ -176,6 +181,7 @@ const changeQrcodeColor = async () => {
   }
 }
 
+// 改变二维码背景色
 const changeQrcodeBgColor = async () => {
   const isOk = checkColorValue(db.qrcode.bg_color)
   if (isOk) {
@@ -185,8 +191,20 @@ const changeQrcodeBgColor = async () => {
   }
 }
 
+// 改变软件关闭时选项
 const changeAppClose = async () => {
-  console.log('=== app ===', db.app.close)
+  await localforage.setItem('app.close', db.app.close)
+}
+
+// 改变软件开机是否开机自启选项
+const changeAppAutoLaunch = async () => {
+  await localforage.setItem('app.autoLaunch', db.app.autoLaunch)
+  invoke('_toggle_auto_launch', { enable: db.app.autoLaunch })
+}
+
+// 改变软件开机是否开机自动更新选项
+const changeAppUpdate = async () => {
+  await localforage.setItem('app.update', db.app.update)
 }
 
 onMounted(async () => {

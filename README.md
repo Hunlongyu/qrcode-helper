@@ -11,6 +11,7 @@ https://vueuse.org/shared/createGlobalState/
 1. 全局快捷键截图识别屏幕二维码 http://xsnip.cn/
 2. 全局快捷键唤醒软件
 3. 唤醒软件后识别剪贴板，如果是文字提示转化成二维码，如果是图片提示解析内容
+4. 识别屏幕二维码: https://lib.rs/crates/screenshots
 
 ### 生成
 1. 批量生成

@@ -108,3 +108,8 @@ async fn parse_image_rxing(path: String) -> Vec<Result> {
     }
     return results;
 }
+
+// 扫描屏幕中存在的二维码
+pub async fn scan_screen() -> String {
+    return "".to_string();
+}

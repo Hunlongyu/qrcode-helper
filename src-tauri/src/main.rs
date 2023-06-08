@@ -3,6 +3,10 @@
 use tokio;
 mod generate;
 mod parse;
+mod settings;
+use tauri::{
+    CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+};
 
 // 生成 svg 字符串
 #[tauri::command]
@@ -44,14 +48,58 @@ async fn _parse_images_with_paths(path: String, lib: Option<String>) -> String {
     return result;
 }
 
+// 设置软件是否开机自启
+#[tauri::command]
+fn _toggle_auto_launch(enable: bool) -> bool {
+    let result = settings::auto_launch(enable);
+    return result;
+}
+
 fn main() {
+    let quit = CustomMenuItem::new("quit".to_string(), "退出");
+    let hide = CustomMenuItem::new("hide".to_string(), "隐藏");
+    let scan = CustomMenuItem::new("scan".to_string(), "识别屏幕二维码");
+    let tray_menu = SystemTrayMenu::new()
+        .add_item(scan)
+        .add_item(hide)
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(quit);
+
     tauri::Builder::default()
+        .system_tray(SystemTray::new().with_menu(tray_menu))
+        .on_system_tray_event(|app, event| match event {
+            SystemTrayEvent::MenuItemClick { id, .. } => {
+                let item_handle = app.tray_handle().get_item(&id);
+                match id.as_str() {
+                    "scan" => {
+                        let _ = parse::scan_screen();
+                    }
+                    "hide" => {
+                        let window = app.get_window("main").unwrap();
+                        let is_visible = window.is_visible().unwrap();
+                        if is_visible {
+                            window.hide().unwrap();
+                            item_handle.set_title("显示").unwrap();
+                        } else {
+                            window.show().unwrap();
+                            item_handle.set_title("隐藏").unwrap();
+                        }
+                    }
+                    "quit" => {
+                        let _ = app.get_window("main").unwrap().close();
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        })
         .invoke_handler(tauri::generate_handler![
             _generate,
             _save_svg,
             _save_png,
             _copy_to_clipboard,
             _parse_images_with_paths,
+            _toggle_auto_launch
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
