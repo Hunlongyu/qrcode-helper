@@ -84,6 +84,7 @@ fn main() {
                             let _ = app_clone
                                 .emit_all("scan_screen", Payload { message: res })
                                 .unwrap();
+                            drop(app_clone);
                         });
                     }
                     "hide" => {
