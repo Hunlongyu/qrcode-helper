@@ -72,7 +72,22 @@ fn main() {
                 let item_handle = app.tray_handle().get_item(&id);
                 match id.as_str() {
                     "scan" => {
-                        let _ = parse::scan_screen();
+                        // let res = parse::scan_screen();
+                        // println!("scan _  {}", res);
+                        #[derive(Clone, serde::Serialize)]
+                        struct Payload {
+                            message: String,
+                        }
+                        let _ = app
+                            .get_window("main")
+                            .unwrap()
+                            .emit(
+                                "scan_screen",
+                                Payload {
+                                    message: "res.into()".to_string(),
+                                },
+                            )
+                            .unwrap();
                     }
                     "hide" => {
                         let window = app.get_window("main").unwrap();

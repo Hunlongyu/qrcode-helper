@@ -1,6 +1,7 @@
 use auto_launch::*;
 use tauri::utils::platform::current_exe;
 
+// 开机自启
 pub fn auto_launch(enable: bool) -> bool {
     let exe = current_exe().unwrap();
     let exe_path = exe.to_str().unwrap();

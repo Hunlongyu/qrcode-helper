@@ -58,6 +58,7 @@
 
 <script setup lang="ts">
 import { dialog, invoke, path } from '@tauri-apps/api'
+import { listen } from '@tauri-apps/api/event';
 import localforage from 'localforage'
 import { reactive, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
@@ -207,10 +208,11 @@ const changeAppUpdate = async () => {
   await localforage.setItem('app.update', db.app.update)
 }
 
-onMounted(async () => {
-  await getDB()
-  await getDesktopPath()
-})
+// onMounted(async () => {
+//   console.log('=== lalala ===')
+//   await getDB()
+//   await getDesktopPath()
+// })
 </script>
 
 <style lang="scss"></style>

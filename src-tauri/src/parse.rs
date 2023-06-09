@@ -1,8 +1,9 @@
+use image::load_from_memory;
 use rqrr::PreparedImage;
 use rxing;
+use screenshots::Screen;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, vec};
-use tokio;
 
 #[derive(Serialize, Deserialize, Clone)]
 struct Result {
@@ -110,6 +111,29 @@ async fn parse_image_rxing(path: String) -> Vec<Result> {
 }
 
 // 扫描屏幕中存在的二维码
-pub async fn scan_screen() -> String {
-    return "".to_string();
+pub fn scan_screen() -> String {
+    let screens = Screen::all().unwrap();
+    let mut results = Vec::new();
+    for screen in screens {
+        let img_arr = screen.capture().unwrap().buffer().to_vec();
+        let _img = load_from_memory(&img_arr).unwrap().to_luma8();
+        let dia = _img.to_vec();
+        let grids_arr = rxing::helpers::detect_multiple_in_luma(dia, _img.width(), _img.height());
+
+        if let Err(_) = grids_arr {
+            return serde_json::to_string(&results).unwrap();
+        }
+        if let Ok(grids) = grids_arr {
+            for grid in grids {
+                let ctx = grid.getText();
+                let r = Result {
+                    result: true,
+                    content: ctx.to_string(),
+                };
+                results.push(r);
+            }
+        }
+    }
+    let results_str = serde_json::to_string(&results).unwrap();
+    return results_str;
 }

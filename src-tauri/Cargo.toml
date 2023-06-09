@@ -16,14 +16,16 @@ custom-protocol = ["tauri/custom-protocol"]
 tauri-build = { version = "^1.0", features = [] }
 
 [dependencies]
-tauri = { version = "1.3", features = ["clipboard", "clipboard-all", "custom-protocol", "dialog-open", "dialog-save", "path-all", "protocol-all", "shell-open", "system-tray"] }
+tauri = { version = "1.3", features = ["clipboard", "clipboard-all", "custom-protocol", "dialog-open", "dialog-save", "path-all", "protocol-all", "shell-open", "system-tray", "window-start-dragging"] }
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
 tokio = "^1.28"
 image = "^0.24"
-resvg = { version = "0.28.0", optional = true }
+resvg = { version = "^0.28", optional = true }
 fast_qr = {version="0.9.0", features= ["image"] }
 rxing = "^0.4"
 clippers = "^0.1"
 rqrr = "^0.6"
 auto-launch = "^0.4"
+screenshots = "^0.4"
+libloading = "0.8.0"
