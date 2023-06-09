@@ -208,11 +208,10 @@ const changeAppUpdate = async () => {
   await localforage.setItem('app.update', db.app.update)
 }
 
-// onMounted(async () => {
-//   console.log('=== lalala ===')
-//   await getDB()
-//   await getDesktopPath()
-// })
+onMounted(async () => {
+  await getDB()
+  await getDesktopPath()
+})
 </script>
 
 <style lang="scss"></style>

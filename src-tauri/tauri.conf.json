@@ -2,7 +2,7 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:1431",
+    "devPath": "http://127.0.0.1:1431",
     "distDir": "../dist",
     "withGlobalTauri": false
   },
@@ -21,10 +21,10 @@
         "open": true
       },
       "dialog": {
-        "all": false,
-        "ask": false,
-        "confirm": false,
-        "message": false,
+        "all": true,
+        "ask": true,
+        "confirm": true,
+        "message": true,
         "open": true,
         "save": true
       },

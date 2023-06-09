@@ -10,13 +10,12 @@
 </template>
 
 <script setup lang="ts">
-import Navigation from './components/Navigation.vue';
-import generate from './views/generate/generate.vue';
-import parse from './views/parse/parse.vue';
-import settings from './views/settings.vue';
+import Navigation from './components/Navigation.vue'
+import generate from './views/generate/generate.vue'
+import parse from './views/parse/parse.vue'
+import settings from './views/settings.vue'
 import { listen } from '@tauri-apps/api/event'
 import { shallowRef, markRaw, onMounted } from 'vue'
-import { window } from '@tauri-apps/api';
 
 interface Views {
   [key: string]: any
@@ -45,12 +44,9 @@ async function windowFocus() {
 onMounted(() => {
   console.log('=== lala on mounted ===')
   // listen('tauri://focus', windowFocus)
-  // listen("scan_screen", val => {
-  //   console.log('=== val ===', val.payload)
-  // })
-  // listen('tauri://file-drop', event => {
-  //   console.log(event)
-  // })
+  listen('tauri://file-drop', event => {
+    console.log(event)
+  })
 })
 
 </script>

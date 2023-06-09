@@ -72,22 +72,19 @@ fn main() {
                 let item_handle = app.tray_handle().get_item(&id);
                 match id.as_str() {
                     "scan" => {
-                        // let res = parse::scan_screen();
-                        // println!("scan _  {}", res);
-                        #[derive(Clone, serde::Serialize)]
-                        struct Payload {
-                            message: String,
-                        }
-                        let _ = app
-                            .get_window("main")
-                            .unwrap()
-                            .emit(
-                                "scan_screen",
-                                Payload {
-                                    message: "res.into()".to_string(),
-                                },
-                            )
-                            .unwrap();
+                        let app_clone = app.clone();
+                        std::thread::spawn(move || {
+                            let res = parse::scan_screen();
+                            println!("scan _  {}", res);
+
+                            #[derive(Clone, serde::Serialize)]
+                            struct Payload {
+                                message: String,
+                            }
+                            let _ = app_clone
+                                .emit_all("scan_screen", Payload { message: res })
+                                .unwrap();
+                        });
                     }
                     "hide" => {
                         let window = app.get_window("main").unwrap();

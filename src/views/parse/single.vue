@@ -26,8 +26,9 @@
 </template>
 
 <script setup lang="ts">
-import { dialog, invoke, clipboard, shell } from '@tauri-apps/api';
-import { ref, Ref } from 'vue';
+import { dialog, invoke, clipboard, shell, tauri } from '@tauri-apps/api'
+import { ref, Ref, onMounted } from 'vue'
+import { listen } from '@tauri-apps/api/event'
 
 const resultList: Ref<Result[]> = ref([])
 
@@ -64,6 +65,23 @@ const handleCopy = async (item: Result) => {
 const handleDelete = (idx: number) => {
   resultList.value.splice(idx, 1)
 }
+
+interface ScanResult {
+  message: string
+}
+onMounted(() => {
+  listen("scan_screen", e => {
+    console.log('=== lala 0 ===', e.payload)
+    const sr = e.payload as ScanResult;
+    const res_json = JSON.parse(sr.message) as Result[]
+    console.log('=== lala 1 ===', res_json.length)
+    if (res_json.length > 0) {
+      resultList.value.unshift(...res_json)
+    } else {
+      dialog.message("未检测到二维码，或二维码解析失败", { title: "识别结果", type: "info" })
+    }
+  })
+})
 
 </script>
 
