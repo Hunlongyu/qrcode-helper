@@ -1,9 +1,8 @@
 use arboard::Clipboard;
 use async_process::Command;
-use image::RgbaImage;
-use image::{load_from_memory, DynamicImage};
+use image::load_from_memory;
 use rqrr::PreparedImage;
-use rxing::{self, BarcodeFormat};
+use rxing;
 use screenshots::Screen;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, vec};
@@ -141,6 +140,7 @@ pub fn scan_screen() -> String {
     return results_str;
 }
 
+// 鼠标截图保存 temp 目录下，并进行识别
 pub async fn screen_capture() -> String {
     let mut child = Command::new("G:\\Github\\qrcode-helper\\src-tauri\\libs\\sc.exe")
         .spawn()
