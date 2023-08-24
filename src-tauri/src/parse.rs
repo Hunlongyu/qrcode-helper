@@ -1,10 +1,12 @@
-use image::load_from_memory;
+use arboard::Clipboard;
+use async_process::Command;
+use image::RgbaImage;
+use image::{load_from_memory, DynamicImage};
 use rqrr::PreparedImage;
-use rxing;
+use rxing::{self, BarcodeFormat};
 use screenshots::Screen;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, vec};
-
 #[derive(Serialize, Deserialize, Clone)]
 struct Result {
     result: bool,
@@ -126,12 +128,42 @@ pub fn scan_screen() -> String {
         if let Ok(grids) = grids_arr {
             for grid in grids {
                 let ctx = grid.getText();
+                println!("scan screen: {}", ctx);
                 let r = Result {
                     result: true,
                     content: ctx.to_string(),
                 };
                 results.push(r);
             }
+        }
+    }
+    let results_str = serde_json::to_string(&results).unwrap();
+    return results_str;
+}
+
+pub async fn screen_capture() -> String {
+    let mut child = Command::new("G:\\Github\\qrcode-helper\\src-tauri\\libs\\sc.exe")
+        .spawn()
+        .unwrap();
+    let _ = child.status().await.unwrap();
+
+    let mut clipboard = Clipboard::new().unwrap();
+    let img_ = clipboard.get_image().unwrap();
+    let v_img = img_.bytes.to_vec();
+    let mut results = Vec::new();
+    let grids_arr =
+        rxing::helpers::detect_multiple_in_luma(v_img, img_.width as u32, img_.height as u32);
+    if let Err(_) = grids_arr {
+        return serde_json::to_string(&results).unwrap();
+    }
+    if let Ok(grids) = grids_arr {
+        for grid in grids {
+            let ctx = grid.getText();
+            let r = Result {
+                result: true,
+                content: ctx.to_string(),
+            };
+            results.push(r);
         }
     }
     let results_str = serde_json::to_string(&results).unwrap();

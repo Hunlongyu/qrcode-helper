@@ -59,7 +59,9 @@ fn main() {
     let quit = CustomMenuItem::new("quit".to_string(), "退出");
     let hide = CustomMenuItem::new("hide".to_string(), "隐藏");
     let scan = CustomMenuItem::new("scan".to_string(), "识别屏幕二维码");
+    let screen_capture = CustomMenuItem::new("screenCapture".to_string(), "鼠标截图识别二维码");
     let tray_menu = SystemTrayMenu::new()
+        .add_item(screen_capture)
         .add_item(scan)
         .add_item(hide)
         .add_native_item(SystemTrayMenuItem::Separator)
@@ -71,6 +73,13 @@ fn main() {
             SystemTrayEvent::MenuItemClick { id, .. } => {
                 let item_handle = app.tray_handle().get_item(&id);
                 match id.as_str() {
+                    "screenCapture" => {
+                        let runtime = tokio::runtime::Runtime::new().unwrap();
+                        runtime.block_on(async {
+                            let res = parse::screen_capture().await;
+                            println!("screenCapture: {}", res);
+                        });
+                    }
                     "scan" => {
                         let app_clone = app.clone();
                         std::thread::spawn(move || {

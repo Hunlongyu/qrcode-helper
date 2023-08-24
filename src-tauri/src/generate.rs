@@ -1,4 +1,4 @@
-use clippers;
+use arboard::{Clipboard, ImageData};
 use fast_qr::{
     convert::{image::ImageBuilder, svg::SvgBuilder, Builder, Shape},
     QRBuilder,
@@ -55,11 +55,13 @@ pub async fn copy_to_clipboard(data: String, color: String, bg_color: String, si
         .background_color(bg_color)
         .fit_height(size)
         .to_pixmap(&_svg);
-    let mut buf = _image.encode_png().unwrap();
-    let dimg = image::load_from_memory_with_format(&mut buf, image::ImageFormat::Png).unwrap();
-    let rgba_img = dimg.to_rgba8();
-    let mut cp = clippers::Clipboard::get();
-    cp.write_image(rgba_img.width(), rgba_img.height(), &rgba_img.as_raw())
-        .unwrap();
+
+    let mut cp = Clipboard::new().unwrap();
+    let img = ImageData {
+        width: _image.width() as usize,
+        height: _image.height() as usize,
+        bytes: _image.data().into(),
+    };
+    cp.set_image(img).unwrap();
     return true;
 }

@@ -27,37 +27,39 @@
       <v-text-field label="二维码默认保存路径" class="mr-4" v-model="db.qrcode.save" variant="solo-inverted"
         @click="changeQrcodeSave"></v-text-field>
       <v-select label="二维码尺寸" :items="[32, 64, 128, 256, 512, 1024]" v-model="db.qrcode.size" variant="solo-inverted"
-        @update:modelValue="changeQrcodeSize"></v-select>
+        @update:model-value="changeQrcodeSize"></v-select>
     </v-row>
     <v-row class="d-flex justify-space-between mt-2">
       <v-text-field label="二维码方块颜色" class="mr-4" v-model="db.qrcode.color" variant="solo-inverted"
-        @update:modelValue="changeQrcodeColor"></v-text-field>
+        @update:model-value="changeQrcodeColor"></v-text-field>
       <v-text-field label="二维码背景颜色" v-model="db.qrcode.bg_color" variant="solo-inverted"
-        @update:modelValue="changeQrcodeBgColor"></v-text-field>
+        @update:model-value="changeQrcodeBgColor"></v-text-field>
     </v-row>
     <v-row class="mt-8">
       快捷键<v-divider></v-divider>
     </v-row>
     <v-row class="mt-6">
-      <v-text-field label="截图识别快捷键" class="mr-4" v-model="db.shortcut.screenshot" variant="solo-inverted"></v-text-field>
-      <v-text-field label="软件唤醒快捷键" v-model="db.shortcut.focus" variant="solo-inverted"></v-text-field>
+      <v-text-field label="截图识别快捷键" class="mr-4" v-model="db.shortcut.screenshot" variant="solo-inverted"
+        @update:model-value="changeShortcutScreenshot"></v-text-field>
+      <v-text-field label="软件唤醒快捷键" v-model="db.shortcut.focus" variant="solo-inverted"
+        @update:model-value="changeShortcutFocus"></v-text-field>
     </v-row>
     <v-row class="mt-8">
       其他<v-divider></v-divider>
     </v-row>
     <v-row class="mt-6">
       <v-autocomplete label="软件关闭时" v-model="db.app.close" :items="close" item-text="title" variant="solo-inverted"
-        @update:modelValue="changeAppClose" item-value="value"></v-autocomplete>
+        @update:model-value="changeAppClose" item-value="value"></v-autocomplete>
       <v-autocomplete class="mx-4" label="软件开机自启" v-model="db.app.autoLaunch" :items="autoLaunch" item-text="title"
-        variant="solo-inverted" @update:modelValue="changeAppAutoLaunch" item-value="value"></v-autocomplete>
+        variant="solo-inverted" @update:model-value="changeAppAutoLaunch" item-value="value"></v-autocomplete>
       <v-autocomplete label="自动更新" v-model="db.app.update" :items="update" item-text="title" variant="solo-inverted"
-        @update:modelValue="changeAppUpdate" item-value="value"></v-autocomplete>
+        @update:model-value="changeAppUpdate" item-value="value"></v-autocomplete>
     </v-row>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { dialog, invoke, path } from '@tauri-apps/api'
+import { dialog, invoke, path, globalShortcut } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event';
 import localforage from 'localforage'
 import { reactive, onMounted } from 'vue'
@@ -130,8 +132,8 @@ const getDB = async () => {
   db.qrcode.size = await localforage.getItem('qrcode.size') || 256
   db.qrcode.color = await localforage.getItem('qrcode.color') || '#000000'
   db.qrcode.bg_color = await localforage.getItem('qrcode.bg_color') || '#ffffff'
-  db.shortcut.screenshot = await localforage.getItem('shortcut.screenshot') || 'alt + s'
-  db.shortcut.focus = await localforage.getItem('shortcut.focus') || 'alt + f'
+  db.shortcut.screenshot = await localforage.getItem('shortcut.screenshot') || 'Alt+S'
+  db.shortcut.focus = await localforage.getItem('shortcut.focus') || 'Alt+F'
   db.app.close = await localforage.getItem('app.close') || 'mini'
   db.app.autoLaunch = await localforage.getItem('app.autoLaunch') || false
   db.app.update = await localforage.getItem('app.update') || true
@@ -192,6 +194,17 @@ const changeQrcodeBgColor = async () => {
   }
 }
 
+// 改变屏幕识别快捷键
+const changeShortcutScreenshot = async () => {
+  // await localforage.setItem('app.shortcut.screenshot', db.shortcut.screenshot)
+  console.log('=== lala ===')
+}
+
+// 改变软件唤醒快捷键
+const changeShortcutFocus = async () => {
+  await localforage.setItem('app.shortcut.focus', db.shortcut.focus)
+}
+
 // 改变软件关闭时选项
 const changeAppClose = async () => {
   await localforage.setItem('app.close', db.app.close)
@@ -205,12 +218,21 @@ const changeAppAutoLaunch = async () => {
 
 // 改变软件开机是否开机自动更新选项
 const changeAppUpdate = async () => {
+  console.log('=== up ===')
   await localforage.setItem('app.update', db.app.update)
+}
+
+// 注册 屏幕识别快捷键
+const registeredGlobalShortcut = async () => {
+  const sreen = db.shortcut.screenshot;
+  const isRegistered = await globalShortcut.isRegistered(sreen)
+  console.log('=== is ===', isRegistered)
 }
 
 onMounted(async () => {
   await getDB()
   await getDesktopPath()
+  await registeredGlobalShortcut()
 })
 </script>
 
