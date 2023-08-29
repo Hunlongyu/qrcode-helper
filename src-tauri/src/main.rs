@@ -8,6 +8,11 @@ use tauri::{
     CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+    message: String,
+}
+
 // 生成 svg 字符串
 #[tauri::command]
 async fn _generate(data: String, color: String, bg_color: String) -> String {
@@ -74,10 +79,22 @@ fn main() {
                 let item_handle = app.tray_handle().get_item(&id);
                 match id.as_str() {
                     "screenCapture" => {
+                        let app_clone = app.clone();
                         let runtime = tokio::runtime::Runtime::new().unwrap();
                         runtime.block_on(async {
                             let res = parse::screen_capture().await;
-                            println!("screenCapture: {}", res);
+                            let results_str = serde_json::to_string(&res).unwrap();
+                            println!("screenCapture: {}", results_str);
+
+                            let _ = app_clone
+                                .emit_all(
+                                    "scan_screen",
+                                    Payload {
+                                        message: results_str,
+                                    },
+                                )
+                                .unwrap();
+                            drop(app_clone);
                         });
                     }
                     "scan" => {
@@ -86,10 +103,6 @@ fn main() {
                             let res = parse::scan_screen();
                             println!("scan _  {}", res);
 
-                            #[derive(Clone, serde::Serialize)]
-                            struct Payload {
-                                message: String,
-                            }
                             let _ = app_clone
                                 .emit_all("scan_screen", Payload { message: res })
                                 .unwrap();

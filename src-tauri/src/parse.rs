@@ -4,13 +4,13 @@ use rqrr::PreparedImage;
 use rxing;
 use screenshots::Screen;
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::path::PathBuf;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::thread;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{collections::HashSet, env, vec};
 
 #[derive(Serialize, Deserialize, Clone)]
-struct Result {
+pub struct Result {
     result: bool,
     content: String,
 }
@@ -82,12 +82,15 @@ async fn parse_image_rqrr(path: String) -> Vec<Result> {
     let img = image::open(path).unwrap().to_luma8();
     let mut img = PreparedImage::prepare(img);
     let grids = img.detect_grids();
+    println!("grids size: {:?}", grids.len());
     let mut results = Vec::new();
     for grid in grids {
         let ctx = grid.decode();
+        println!("ctx: {:?}", ctx);
         match ctx {
             Ok(val) => {
                 let (_, content) = val;
+                println!("content: {}", content);
                 let r = Result {
                     result: true,
                     content: content,
@@ -106,6 +109,7 @@ async fn parse_image_rxing(path: String) -> Vec<Result> {
     let mut results = Vec::new();
     for grid in grids {
         let ctx = grid.getText();
+        println!("content: {}", ctx.to_string());
         let r = Result {
             result: true,
             content: ctx.to_string(),
@@ -145,36 +149,27 @@ pub fn scan_screen() -> String {
 }
 
 // 鼠标截图保存 temp 目录下，并进行识别
-pub async fn screen_capture() -> String {
+pub async fn screen_capture() -> Vec<Result> {
     let temp_dir = env::temp_dir();
-    println!("temp_dir: {:?}", temp_dir);
-
-    let temp_dir_long = std::fs::canonicalize(&temp_dir).unwrap();
-    println!("temp_dir_long: {:?}", temp_dir_long);
-
     let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     let seconds = timestamp.as_secs();
-
-    let mut file_name = PathBuf::from(temp_dir_long);
+    let mut file_name = PathBuf::from(temp_dir);
     file_name.push("qrcode-helper");
     file_name.push(seconds.to_string());
     file_name.set_extension("png");
-    println!("file_name: {:?}", file_name);
 
-    if let Some(parent) = file_name.parent() {
-        fs::create_dir_all(parent).expect("Failed to create directories");
-    }
-
-    let mut child = Command::new("E:\\qrcode-helper\\src-tauri\\libs\\qcsc.exe")
+    let mut child = Command::new("G:\\Github\\qrcode-helper\\src-tauri\\libs\\qcsc.exe")
         .arg(&file_name)
-        // .arg("C:\\Users\\hunlongyu\\AppData\\Local\\Temp\\012\\1619784753.png")
         .spawn()
         .unwrap();
     let _ = child.status().await.unwrap();
 
-    return parse_images_with_paths(
-        file_name.into_os_string().into_string().unwrap(),
-        Some("all".to_string()),
-    )
-    .await;
+    thread::sleep(Duration::from_secs(1));
+
+    let arr = parse_image_rxing(file_name.clone().into_os_string().into_string().unwrap()).await;
+
+    thread::sleep(Duration::from_secs(3));
+    std::fs::remove_file(file_name).unwrap();
+
+    return arr;
 }
