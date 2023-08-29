@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{collections::HashSet, env, vec};
+use tauri::AppHandle;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Result {
@@ -149,7 +150,7 @@ pub fn scan_screen() -> String {
 }
 
 // 鼠标截图保存 temp 目录下，并进行识别
-pub async fn screen_capture() -> Vec<Result> {
+pub async fn screen_capture(app: &AppHandle) -> Vec<Result> {
     let temp_dir = env::temp_dir();
     let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     let seconds = timestamp.as_secs();
@@ -158,10 +159,11 @@ pub async fn screen_capture() -> Vec<Result> {
     file_name.push(seconds.to_string());
     file_name.set_extension("png");
 
-    let mut child = Command::new("G:\\Github\\qrcode-helper\\src-tauri\\libs\\qcsc.exe")
-        .arg(&file_name)
-        .spawn()
+    let qcsc = app
+        .path_resolver()
+        .resolve_resource("libs/qcsc.exe")
         .unwrap();
+    let mut child = Command::new(qcsc).arg(&file_name).spawn().unwrap();
     let _ = child.status().await.unwrap();
 
     thread::sleep(Duration::from_secs(1));

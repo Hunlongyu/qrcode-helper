@@ -82,7 +82,7 @@ fn main() {
                         let app_clone = app.clone();
                         let runtime = tokio::runtime::Runtime::new().unwrap();
                         runtime.block_on(async {
-                            let res = parse::screen_capture().await;
+                            let res = parse::screen_capture(&app_clone).await;
                             let results_str = serde_json::to_string(&res).unwrap();
                             println!("screenCapture: {}", results_str);
 

@@ -69,11 +69,19 @@
         "unmaximize": false,
         "unminimize": false
       },
+      "fs": {
+        "scope": [
+          "$RESOURCE/*"
+        ]
+      },
       "globalShortcut": {
         "all": true
       }
     },
     "bundle": {
+      "resources": [
+        "libs/*"
+      ],
       "active": true,
       "icon": [
         "icons/32x32.png",
