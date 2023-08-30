@@ -75,6 +75,16 @@ fn main() {
     tauri::Builder::default()
         .system_tray(SystemTray::new().with_menu(tray_menu))
         .on_system_tray_event(|app, event| match event {
+            SystemTrayEvent::DoubleClick { .. } => {
+                let win = app.get_window("main").unwrap();
+                let is_visible = win.is_visible().unwrap();
+                if is_visible {
+                    win.hide().unwrap();
+                } else {
+                    win.show().unwrap();
+                    win.set_focus().unwrap();
+                }
+            }
             SystemTrayEvent::MenuItemClick { id, .. } => {
                 let item_handle = app.tray_handle().get_item(&id);
                 match id.as_str() {
@@ -118,6 +128,7 @@ fn main() {
                             item_handle.set_title("显示").unwrap();
                         } else {
                             window.show().unwrap();
+                            window.set_focus().unwrap();
                             item_handle.set_title("隐藏").unwrap();
                         }
                     }
