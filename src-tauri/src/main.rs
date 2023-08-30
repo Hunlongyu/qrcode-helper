@@ -99,8 +99,9 @@ fn main() {
                     }
                     "scan" => {
                         let app_clone = app.clone();
-                        std::thread::spawn(move || {
-                            let res = parse::scan_screen();
+                        let runtime = tokio::runtime::Runtime::new().unwrap();
+                        runtime.block_on(async {
+                            let res = parse::scan_screen().await;
                             println!("scan _  {}", res);
 
                             let _ = app_clone

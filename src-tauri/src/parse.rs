@@ -1,14 +1,15 @@
 use async_process::Command;
-use image::load_from_memory;
 use rqrr::PreparedImage;
 use rxing;
 use screenshots::Screen;
 use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::prelude::*;
 use std::path::PathBuf;
-use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{collections::HashSet, env, vec};
 use tauri::AppHandle;
+use tokio::time::sleep;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Result {
@@ -18,7 +19,6 @@ pub struct Result {
 
 // 解析多个文件，并可以指定 解析库 来解析二维码图片
 pub async fn parse_images_with_paths(paths: String, lib: Option<String>) -> String {
-    println!("paths: {}", paths);
     let paths_json: Vec<String> = serde_json::from_str(&paths).unwrap();
     let mut tasks = vec![];
     for path in paths_json {
@@ -83,15 +83,12 @@ async fn parse_image_rqrr(path: String) -> Vec<Result> {
     let img = image::open(path).unwrap().to_luma8();
     let mut img = PreparedImage::prepare(img);
     let grids = img.detect_grids();
-    println!("grids size: {:?}", grids.len());
     let mut results = Vec::new();
     for grid in grids {
         let ctx = grid.decode();
-        println!("ctx: {:?}", ctx);
         match ctx {
             Ok(val) => {
                 let (_, content) = val;
-                println!("content: {}", content);
                 let r = Result {
                     result: true,
                     content: content,
@@ -106,11 +103,15 @@ async fn parse_image_rqrr(path: String) -> Vec<Result> {
 
 // 使用 【rxing】 解析指定二维码图片
 async fn parse_image_rxing(path: String) -> Vec<Result> {
-    let grids = rxing::helpers::detect_multiple_in_file(&path).expect("decodes");
+    let grids = match rxing::helpers::detect_multiple_in_file(&path) {
+        Ok(grids) => grids,
+        Err(_) => {
+            return Vec::new();
+        }
+    };
     let mut results = Vec::new();
     for grid in grids {
         let ctx = grid.getText();
-        println!("content: {}", ctx.to_string());
         let r = Result {
             result: true,
             content: ctx.to_string(),
@@ -121,57 +122,51 @@ async fn parse_image_rxing(path: String) -> Vec<Result> {
 }
 
 // 扫描屏幕中存在的二维码
-pub fn scan_screen() -> String {
+pub async fn scan_screen() -> String {
     let screens = Screen::all().unwrap();
     let mut results = Vec::new();
     for screen in screens {
-        let img_arr = screen.capture().unwrap().buffer().to_vec();
-        let _img = load_from_memory(&img_arr).unwrap().to_luma8();
-        let dia = _img.to_vec();
-        let grids_arr = rxing::helpers::detect_multiple_in_luma(dia, _img.width(), _img.height());
-
-        if let Err(_) = grids_arr {
-            return serde_json::to_string(&results).unwrap();
-        }
-        if let Ok(grids) = grids_arr {
-            for grid in grids {
-                let ctx = grid.getText();
-                println!("scan screen: {}", ctx);
-                let r = Result {
-                    result: true,
-                    content: ctx.to_string(),
-                };
+        let id = screen.display_info.id;
+        let sc = screen.capture().unwrap();
+        let filename = get_temp_dir(id.to_string());
+        let mut file = File::create(&filename).unwrap();
+        file.write_all(sc.buffer()).unwrap();
+        file.sync_all().unwrap();
+        let arr = parse_image_rxing(filename.clone().into_os_string().into_string().unwrap()).await;
+        if arr.len() > 0 {
+            for r in arr {
                 results.push(r);
             }
         }
+        tokio::fs::remove_file(&filename).await.unwrap();
     }
     let results_str = serde_json::to_string(&results).unwrap();
     return results_str;
 }
 
-// 鼠标截图保存 temp 目录下，并进行识别
-pub async fn screen_capture(app: &AppHandle) -> Vec<Result> {
+// 获取临时文件路径
+fn get_temp_dir(name: String) -> PathBuf {
     let temp_dir = env::temp_dir();
-    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-    let seconds = timestamp.as_secs();
     let mut file_name = PathBuf::from(temp_dir);
     file_name.push("qrcode-helper");
-    file_name.push(seconds.to_string());
+    file_name.push(name);
     file_name.set_extension("png");
+    return file_name;
+}
 
+// 鼠标截图保存 temp 目录下，并进行识别
+pub async fn screen_capture(app: &AppHandle) -> Vec<Result> {
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let seconds = timestamp.as_secs();
+    let file_name = get_temp_dir(seconds.to_string());
     let qcsc = app
         .path_resolver()
         .resolve_resource("libs/qcsc.exe")
         .unwrap();
     let mut child = Command::new(qcsc).arg(&file_name).spawn().unwrap();
     let _ = child.status().await.unwrap();
-
-    thread::sleep(Duration::from_secs(1));
-
+    sleep(Duration::from_secs(1)).await;
     let arr = parse_image_rxing(file_name.clone().into_os_string().into_string().unwrap()).await;
-
-    thread::sleep(Duration::from_secs(3));
-    std::fs::remove_file(file_name).unwrap();
-
+    tokio::fs::remove_file(&file_name).await.unwrap();
     return arr;
 }
