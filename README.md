@@ -29,3 +29,15 @@ https://vueuse.org/shared/createGlobalState/
 3. 二维码保存路径
 4. 二维码尺寸、方块颜色、背景色
 5. 快捷键自定义
+
+
+
+## 开发
+
+### 获取更多错误信息
+```shell
+set RUST_BACKTRACE=1
+tauri dev
+```
+
+### 
